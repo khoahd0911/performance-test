@@ -1,0 +1,169 @@
+<html>
+
+<body>
+    <script src="//api.blockchain.z.com/static/client/lib/eth-client.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/demo-util.js"></script>
+
+    <div class="actions">
+        <input type="button" id="createAcount" value="createAcount" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="call" value="call" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="sendData" value="sendData" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="getData" value="getData" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="deleteData" value="deleteData" class="btn primary" />
+        </br>
+        </br>
+        <input type="file" id="file" />
+        <input type="button" id="sendFile" value="sendFile" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="getFile" value="getFile" class="btn primary" />
+        </br>
+        </br>
+        <input type="button" id="deleteFile" value="deleteFile" class="btn primary" />
+        </br>
+        </br>
+
+    </div>
+
+    <script type="text/javascript">
+
+        var password = "";
+        var objectID = DEMO_UTIL.createRandomId(32);
+        var input = document.getElementById('file');
+
+        function createAcount() {
+            ethClient.Account.create(baseUrl, password, function (err, _account) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    localStorage.setItem("ACCOUNT", _account.serialize())
+                    console.log('ACCOUNT.address : ', _account.getAddress());
+                }
+            });
+        }
+
+        function call() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+
+            contract.call(password, 'TestPerformanceContract', 'call', [], abi, function (err, res) {
+                if (err) {
+                console.error(err);
+                return;
+            }
+            console.log('res :',res);
+            })
+        };
+
+        function sendData() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+            console.log("objectID aaa", objectID);
+
+            contract.sendData(password, 'TestPerformanceContract', 'sendData', objectID, 'hello vnlab', ['param1'], abi, function (err, txHash) {
+                if (err) {
+                    console.error(err);
+                }
+                else console.log('txHash :', txHash);
+            })
+        };
+
+        function getData() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+            console.log("objectID aaa", objectID);
+
+            contract.getData(password, 'TestPerformanceContract', 'getData', [objectID], abi, function (err, data) {
+                if (err) console.error(err);
+                else {
+                    data.map(function (d) {
+                        console.log(d);
+                    });
+                }
+            })
+        };
+
+        function deleteData() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+
+            contract.deleteData(password, 'TestPerformanceContract', 'deleteData', objectID, ['param1'], abi, function (err, txHash) {
+                if (err) {
+                    console.error(err);
+                }
+                else console.log('txHash :', txHash);
+            })
+        };
+
+        function sendFile() {
+            console.log("objectID : ", objectID);
+
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+            contract.sendFile(password, 'TestPerformanceContract', 'sendFile', objectID, 'sendFile.txt', input.files[0], ['sendData'], abi, function (err, txHash) {
+                if (err) {
+                    console.log(err);
+                }
+                else console.log('txHash :', txHash);
+            })
+        };
+
+        function getFile() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+            contract.getFile(password, 'TestPerformanceContract', 'getFile', [objectID], abi, function (err, file) {
+                if (err) console.error(err);
+                else {
+                    console.log("File name: ", file.name);
+
+                    var link = document.createElement("a");
+                    document.body.appendChild(link);
+                    link.href = window.URL.createObjectURL(file);
+                    link.download = file.name;
+                    link.click();
+                    window.URL.revokeObjectUrl(link.href);
+                    document.body.removeChild(link);
+                }
+            })
+        };
+
+        function deleteFile() {
+            var account = ethClient.Account.deserialize(localStorage.getItem("ACCOUNT"));
+            var contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+
+            contract.deleteFile(password, 'TestPerformanceContract', 'deleteFile', objectID, ['param1'], abi, function (err, txHash) {
+                if (err) {
+                    console.error(err);
+                }
+                else console.log('txHash :', txHash);
+            })
+        };
+
+        document.getElementById('createAcount').addEventListener('click', createAcount);
+        document.getElementById('call').addEventListener('click', call);
+        document.getElementById('sendData').addEventListener('click', sendData);
+        document.getElementById('getData').addEventListener('click', getData);
+        document.getElementById('sendFile').addEventListener('click', sendFile);
+        document.getElementById('getFile').addEventListener('click', getFile);
+        document.getElementById('deleteData').addEventListener('click', deleteData);
+        document.getElementById('deleteFile').addEventListener('click', deleteFile);
+
+
+    </script>
+    <div>
+        <span id="result" />
+    </div>
+
+</body>
+
+</html>

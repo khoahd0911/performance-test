@@ -1,0 +1,7 @@
+Guildline
+Step1: Change value for these constant to change test condition: DURING, REQUEST_PER_SECOND
+Step2: Run following commands one by one to test:
+node cluster.js --testType=sendData
+node cluster.js --testType=deleteData
+node cluster.js --testType=sendFile
+node cluster.js --testType=deleteFile
